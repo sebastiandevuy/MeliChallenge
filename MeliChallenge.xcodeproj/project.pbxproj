@@ -15,6 +15,10 @@
 		2F50B15A26BCC09B004709E3 /* TitanHttp in Frameworks */ = {isa = PBXBuildFile; productRef = 2F50B15926BCC09B004709E3 /* TitanHttp */; };
 		2F50B15D26BCC0DE004709E3 /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = 2F50B15C26BCC0DE004709E3 /* Quick */; };
 		2F50B16026BCC10E004709E3 /* Nimble in Frameworks */ = {isa = PBXBuildFile; productRef = 2F50B15F26BCC10E004709E3 /* Nimble */; };
+		2F50B16526BCC2EA004709E3 /* ServiceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F50B16426BCC2EA004709E3 /* ServiceManager.swift */; };
+		2F50B16926BCC58D004709E3 /* ItemManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F50B16826BCC58D004709E3 /* ItemManager.swift */; };
+		2F50B16C26BCC6A6004709E3 /* AutoSuggestEndpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F50B16B26BCC6A6004709E3 /* AutoSuggestEndpoint.swift */; };
+		2F50B17026BCCBF8004709E3 /* SearchMainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F50B16F26BCCBF8004709E3 /* SearchMainViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -37,6 +41,10 @@
 		2F50B13A26BCBD66004709E3 /* MeliChallengeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MeliChallengeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		2F50B13E26BCBD66004709E3 /* MeliChallengeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeliChallengeTests.swift; sourceTree = "<group>"; };
 		2F50B14026BCBD66004709E3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		2F50B16426BCC2EA004709E3 /* ServiceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceManager.swift; sourceTree = "<group>"; };
+		2F50B16826BCC58D004709E3 /* ItemManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemManager.swift; sourceTree = "<group>"; };
+		2F50B16B26BCC6A6004709E3 /* AutoSuggestEndpoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoSuggestEndpoint.swift; sourceTree = "<group>"; };
+		2F50B16F26BCCBF8004709E3 /* SearchMainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchMainViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -81,10 +89,12 @@
 		2F50B12626BCBD64004709E3 /* MeliChallenge */ = {
 			isa = PBXGroup;
 			children = (
+				2F50B16326BCC2BA004709E3 /* Managers */,
 				2F50B15726BCBDAC004709E3 /* AppInit */,
 				2F50B13026BCBD66004709E3 /* Assets.xcassets */,
-				2F50B13226BCBD66004709E3 /* LaunchScreen.storyboard */,
+				2F50B16126BCC292004709E3 /* Controllers */,
 				2F50B13526BCBD66004709E3 /* Info.plist */,
+				2F50B13226BCBD66004709E3 /* LaunchScreen.storyboard */,
 			);
 			path = MeliChallenge;
 			sourceTree = "<group>";
@@ -105,6 +115,56 @@
 				2F50B12926BCBD64004709E3 /* SceneDelegate.swift */,
 			);
 			path = AppInit;
+			sourceTree = "<group>";
+		};
+		2F50B16126BCC292004709E3 /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				2F50B16226BCC2A8004709E3 /* SearchMainViewController */,
+			);
+			path = Controllers;
+			sourceTree = "<group>";
+		};
+		2F50B16226BCC2A8004709E3 /* SearchMainViewController */ = {
+			isa = PBXGroup;
+			children = (
+				2F50B16F26BCCBF8004709E3 /* SearchMainViewController.swift */,
+			);
+			path = SearchMainViewController;
+			sourceTree = "<group>";
+		};
+		2F50B16326BCC2BA004709E3 /* Managers */ = {
+			isa = PBXGroup;
+			children = (
+				2F50B16726BCC57E004709E3 /* ItemManager */,
+				2F50B16626BCC3EE004709E3 /* ServiceManager */,
+			);
+			path = Managers;
+			sourceTree = "<group>";
+		};
+		2F50B16626BCC3EE004709E3 /* ServiceManager */ = {
+			isa = PBXGroup;
+			children = (
+				2F50B16A26BCC68A004709E3 /* Endpoints */,
+				2F50B16426BCC2EA004709E3 /* ServiceManager.swift */,
+			);
+			path = ServiceManager;
+			sourceTree = "<group>";
+		};
+		2F50B16726BCC57E004709E3 /* ItemManager */ = {
+			isa = PBXGroup;
+			children = (
+				2F50B16826BCC58D004709E3 /* ItemManager.swift */,
+			);
+			path = ItemManager;
+			sourceTree = "<group>";
+		};
+		2F50B16A26BCC68A004709E3 /* Endpoints */ = {
+			isa = PBXGroup;
+			children = (
+				2F50B16B26BCC6A6004709E3 /* AutoSuggestEndpoint.swift */,
+			);
+			path = Endpoints;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -218,8 +278,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2F50B16C26BCC6A6004709E3 /* AutoSuggestEndpoint.swift in Sources */,
 				2F50B12826BCBD64004709E3 /* AppDelegate.swift in Sources */,
 				2F50B12A26BCBD64004709E3 /* SceneDelegate.swift in Sources */,
+				2F50B16926BCC58D004709E3 /* ItemManager.swift in Sources */,
+				2F50B16526BCC2EA004709E3 /* ServiceManager.swift in Sources */,
+				2F50B17026BCCBF8004709E3 /* SearchMainViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
