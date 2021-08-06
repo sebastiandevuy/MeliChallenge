@@ -15,7 +15,8 @@ class SearchMainViewController: UIViewController {
     private let suggestionsTableView = UITableView(frame: .zero, style: .grouped)
     private let resultsTableView = UITableView(frame: .zero, style: .grouped)
     
-    private var suggestionsDataSource: UITableViewDiffableDataSource<Int, AutoSuggestEndpoint.AutoSuggestResponse.SuggestedQuery>?
+    private var suggestionsDataSource: UITableViewDiffableDataSource<Int, String>?
+    private var searchResultsDataSource: UITableViewDiffableDataSource<Int, SearchResultDisplayModel>?
     
     init(viewModel: SearchMainViewModel = SearchMainViewModel()) {
         self.viewModel = viewModel
@@ -40,6 +41,14 @@ class SearchMainViewController: UIViewController {
         self.navigationItem.searchController = search
         
         resultsTableView.translatesAutoresizingMaskIntoConstraints = false
+        resultsTableView.register(SearchResultTableViewCell.self, forCellReuseIdentifier: "searchResultCell")
+        searchResultsDataSource = UITableViewDiffableDataSource<Int, SearchResultDisplayModel>(tableView: resultsTableView) { tableView, indexPath, resultModel in
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: "searchResultCell") as? SearchResultTableViewCell else {
+                return UITableViewCell()
+            }
+            cell.setupWithModel(resultModel)
+            return cell
+        }
         view.addSubview(resultsTableView)
         NSLayoutConstraint.activate([resultsTableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
                                      resultsTableView.leftAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leftAnchor),
@@ -47,18 +56,19 @@ class SearchMainViewController: UIViewController {
                                      resultsTableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)])
         
         suggestionsTableView.translatesAutoresizingMaskIntoConstraints = false
-        suggestionsDataSource = UITableViewDiffableDataSource<Int, AutoSuggestEndpoint.AutoSuggestResponse.SuggestedQuery>(tableView: suggestionsTableView) { tableView, indexPath, suggestedQuery in
-            let tableViewCell = UITableViewCell()
-            tableViewCell.textLabel?.text = suggestedQuery.query
-            return tableViewCell
+        suggestionsTableView.register(SuggestionTableViewCell.self, forCellReuseIdentifier: "suggestionCell")
+        suggestionsDataSource = UITableViewDiffableDataSource<Int, String>(tableView: suggestionsTableView) { tableView, indexPath, suggestedQuery in
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: "suggestionCell") as? SuggestionTableViewCell else {
+                return UITableViewCell()
+            }
+            cell.setupWithQuery(suggestedQuery)
+            return cell
         }
         view.addSubview(suggestionsTableView)
         NSLayoutConstraint.activate([suggestionsTableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
                                      suggestionsTableView.leftAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leftAnchor),
                                      suggestionsTableView.rightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor),
                                      suggestionsTableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)])
-        
-        //AutoSuggestEndpoint.AutoSuggestResponse
     }
     
     private func setupViewModelBindings() {
@@ -80,6 +90,11 @@ class SearchMainViewController: UIViewController {
         viewModel.viewState.$suggestionsSnapshot.sink { [weak self] snapshot in
             guard let self = self, let snapshot = snapshot else { return }
             self.suggestionsDataSource?.apply(snapshot, animatingDifferences: false)
+        }.store(in: &subscribers)
+        
+        viewModel.viewState.$searchResultsSnapshot.sink { [weak self] snapshot in
+            guard let self = self, let snapshot = snapshot else { return }
+            self.searchResultsDataSource?.apply(snapshot, animatingDifferences: false)
         }.store(in: &subscribers)
     }
 }

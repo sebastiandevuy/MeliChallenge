@@ -1,13 +1,14 @@
 //
-//  SuggestionTableViewCell.swift
+//  SearchResultTableViewCell.swift
 //  MeliChallenge
 //
 //  Created by Pablo Gonzalez on 6/8/21.
 //
 
 import UIKit
+import SDWebImage
 
-class SuggestionTableViewCell: UITableViewCell {
+class SearchResultTableViewCell: UITableViewCell {
     private let searchImageView = UIImageView()
     private let queryLabel = UILabel()
     
@@ -22,10 +23,9 @@ class SuggestionTableViewCell: UITableViewCell {
     
     private func setupView() {
         searchImageView.translatesAutoresizingMaskIntoConstraints = false
-        searchImageView.image = UIImage(named: "searchIcon")
         addSubview(searchImageView)
-        NSLayoutConstraint.activate([searchImageView.widthAnchor.constraint(equalToConstant: 25),
-                                     searchImageView.heightAnchor.constraint(equalToConstant: 25),
+        NSLayoutConstraint.activate([searchImageView.widthAnchor.constraint(equalToConstant: 100),
+                                     searchImageView.heightAnchor.constraint(equalToConstant: 100),
                                      searchImageView.topAnchor.constraint(equalTo: topAnchor, constant: 8),
                                      searchImageView.leftAnchor.constraint(equalTo: leftAnchor, constant: 8),
                                      searchImageView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8)])
@@ -37,8 +37,9 @@ class SuggestionTableViewCell: UITableViewCell {
                                      queryLabel.rightAnchor.constraint(equalTo: rightAnchor, constant: -8)])
     }
     
-    func setupWithQuery(_ query: String) {
-        queryLabel.text = query
-        
+    func setupWithModel(_ model: SearchResultDisplayModel) {
+        queryLabel.text = model.title
+        searchImageView.sd_setImage(with: URL(string: model.imageUrl), completed: nil)
     }
+
 }

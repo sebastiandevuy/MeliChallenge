@@ -17,6 +17,9 @@
 		2F12F3C526BD930800F92152 /* ViewModellable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F12F3C426BD930800F92152 /* ViewModellable.swift */; };
 		2F12F3C726BD933400F92152 /* SearchMainViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F12F3C626BD933400F92152 /* SearchMainViewModel.swift */; };
 		2F12F3CF26BDBC9300F92152 /* SuggestionTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F12F3CE26BDBC9300F92152 /* SuggestionTableViewCell.swift */; };
+		2F12F3D226BDD48500F92152 /* SearchResultDisplayModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F12F3D126BDD48500F92152 /* SearchResultDisplayModel.swift */; };
+		2F12F3D526BDDBFA00F92152 /* SearchResultTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F12F3D426BDDBFA00F92152 /* SearchResultTableViewCell.swift */; };
+		2F12F3D826BDDCC400F92152 /* SDWebImage in Frameworks */ = {isa = PBXBuildFile; productRef = 2F12F3D726BDDCC400F92152 /* SDWebImage */; };
 		2F50B12826BCBD64004709E3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F50B12726BCBD64004709E3 /* AppDelegate.swift */; };
 		2F50B12A26BCBD64004709E3 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F50B12926BCBD64004709E3 /* SceneDelegate.swift */; };
 		2F50B13126BCBD66004709E3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2F50B13026BCBD66004709E3 /* Assets.xcassets */; };
@@ -52,6 +55,8 @@
 		2F12F3C426BD930800F92152 /* ViewModellable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModellable.swift; sourceTree = "<group>"; };
 		2F12F3C626BD933400F92152 /* SearchMainViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchMainViewModel.swift; sourceTree = "<group>"; };
 		2F12F3CE26BDBC9300F92152 /* SuggestionTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestionTableViewCell.swift; sourceTree = "<group>"; };
+		2F12F3D126BDD48500F92152 /* SearchResultDisplayModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResultDisplayModel.swift; sourceTree = "<group>"; };
+		2F12F3D426BDDBFA00F92152 /* SearchResultTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResultTableViewCell.swift; sourceTree = "<group>"; };
 		2F50B12426BCBD64004709E3 /* MeliChallenge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MeliChallenge.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2F50B12726BCBD64004709E3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		2F50B12926BCBD64004709E3 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -72,6 +77,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2F12F3D826BDDCC400F92152 /* SDWebImage in Frameworks */,
 				2F50B15A26BCC09B004709E3 /* TitanHttp in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -137,6 +143,7 @@
 		2F12F3CC26BDBC5300F92152 /* UITableViewCells */ = {
 			isa = PBXGroup;
 			children = (
+				2F12F3D326BDDBDC00F92152 /* SearchResultTableViewCell */,
 				2F12F3CD26BDBC6B00F92152 /* SuggestionTableViewCell */,
 			);
 			path = UITableViewCells;
@@ -148,6 +155,22 @@
 				2F12F3CE26BDBC9300F92152 /* SuggestionTableViewCell.swift */,
 			);
 			path = SuggestionTableViewCell;
+			sourceTree = "<group>";
+		};
+		2F12F3D026BDD2B700F92152 /* Entities */ = {
+			isa = PBXGroup;
+			children = (
+				2F12F3D126BDD48500F92152 /* SearchResultDisplayModel.swift */,
+			);
+			path = Entities;
+			sourceTree = "<group>";
+		};
+		2F12F3D326BDDBDC00F92152 /* SearchResultTableViewCell */ = {
+			isa = PBXGroup;
+			children = (
+				2F12F3D426BDDBFA00F92152 /* SearchResultTableViewCell.swift */,
+			);
+			path = SearchResultTableViewCell;
 			sourceTree = "<group>";
 		};
 		2F50B11B26BCBD64004709E3 = {
@@ -212,6 +235,7 @@
 		2F50B16226BCC2A8004709E3 /* SearchMainViewController */ = {
 			isa = PBXGroup;
 			children = (
+				2F12F3D026BDD2B700F92152 /* Entities */,
 				2F50B16F26BCCBF8004709E3 /* SearchMainViewController.swift */,
 				2F12F3C626BD933400F92152 /* SearchMainViewModel.swift */,
 			);
@@ -271,6 +295,7 @@
 			name = MeliChallenge;
 			packageProductDependencies = (
 				2F50B15926BCC09B004709E3 /* TitanHttp */,
+				2F12F3D726BDDCC400F92152 /* SDWebImage */,
 			);
 			productName = MeliChallenge;
 			productReference = 2F50B12426BCBD64004709E3 /* MeliChallenge.app */;
@@ -329,6 +354,7 @@
 				2F50B15826BCC09B004709E3 /* XCRemoteSwiftPackageReference "TitanHttp" */,
 				2F50B15B26BCC0DE004709E3 /* XCRemoteSwiftPackageReference "Quick" */,
 				2F50B15E26BCC10E004709E3 /* XCRemoteSwiftPackageReference "Nimble" */,
+				2F12F3D626BDDCC400F92152 /* XCRemoteSwiftPackageReference "SDWebImage" */,
 			);
 			productRefGroup = 2F50B12526BCBD64004709E3 /* Products */;
 			projectDirPath = "";
@@ -367,10 +393,12 @@
 				2F12F3C726BD933400F92152 /* SearchMainViewModel.swift in Sources */,
 				2F12F3C326BD70EB00F92152 /* SearchResponseResult.swift in Sources */,
 				2F12F3C126BD70C700F92152 /* SearchResponsePaging.swift in Sources */,
+				2F12F3D226BDD48500F92152 /* SearchResultDisplayModel.swift in Sources */,
 				2F12F3CF26BDBC9300F92152 /* SuggestionTableViewCell.swift in Sources */,
 				2F50B16C26BCC6A6004709E3 /* AutoSuggestEndpoint.swift in Sources */,
 				2F50B12826BCBD64004709E3 /* AppDelegate.swift in Sources */,
 				2F50B12A26BCBD64004709E3 /* SceneDelegate.swift in Sources */,
+				2F12F3D526BDDBFA00F92152 /* SearchResultTableViewCell.swift in Sources */,
 				2F12F3BD26BD707400F92152 /* SearchRequest.swift in Sources */,
 				2F50B16926BCC58D004709E3 /* ItemManager.swift in Sources */,
 				2F12F3B926BD6F9D00F92152 /* AutoSuggestResponse.swift in Sources */,
@@ -640,6 +668,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		2F12F3D626BDDCC400F92152 /* XCRemoteSwiftPackageReference "SDWebImage" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SDWebImage/SDWebImage.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.11.1;
+			};
+		};
 		2F50B15826BCC09B004709E3 /* XCRemoteSwiftPackageReference "TitanHttp" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sebastiandevuy/TitanHttp.git";
@@ -667,6 +703,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		2F12F3D726BDDCC400F92152 /* SDWebImage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2F12F3D626BDDCC400F92152 /* XCRemoteSwiftPackageReference "SDWebImage" */;
+			productName = SDWebImage;
+		};
 		2F50B15926BCC09B004709E3 /* TitanHttp */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 2F50B15826BCC09B004709E3 /* XCRemoteSwiftPackageReference "TitanHttp" */;

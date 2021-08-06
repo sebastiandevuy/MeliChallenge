@@ -16,6 +16,7 @@ class SearchMainViewModel: ViewModelable {
     private let itemManager: ItemManager
     private var subscribers = Set<AnyCancellable>()
     private var getSuggestionsSubscriber: AnyCancellable?
+    private var searchSubscriber: AnyCancellable?
     
     
     init(itemManager: ItemManager = ItemManager()) {
@@ -47,6 +48,7 @@ class SearchMainViewModel: ViewModelable {
     
     private func handleDidTapSearch() {
         viewState.displayMode = .results
+        preformSearch()
     }
     
     private func handleDidUpdateQuery(_ query: String?) {
@@ -75,10 +77,36 @@ class SearchMainViewModel: ViewModelable {
     }
     
     private func setupSuggestionsSnapshotFromResponse(_ response:  AutoSuggestEndpoint.AutoSuggestResponse) {
-        var snapshot = NSDiffableDataSourceSnapshot<Int, AutoSuggestEndpoint.AutoSuggestResponse.SuggestedQuery>()
+        var snapshot = NSDiffableDataSourceSnapshot<Int, String>()
         snapshot.appendSections([1])
-        snapshot.appendItems(response.suggestedQueries ?? [], toSection: 1)
+        let queries = response.suggestedQueries!.map({return $0.query})
+        snapshot.appendItems(queries, toSection: 1)
         viewState.suggestionsSnapshot = snapshot
+    }
+    
+    private func preformSearch() {
+        guard let query = viewState.searchQuery else { return }
+        searchSubscriber?.cancel()
+        searchSubscriber = itemManager
+            .getSearchResults(forQuery: query, limit: 20, offset: 0).sink(receiveCompletion: { completion in
+                print(completion)
+            }, receiveValue: { [weak self] response in
+                self?.handleSearchResponse(response)
+            })
+    }
+    
+    private func updatePager(forQuery query: String) {
+        if modelState.resultsPager.currentQuery != query {
+            modelState.resultsPager = SearchResultsPager(query: query)
+        }
+    }
+    
+    private func handleSearchResponse(_ response: SearchEndpoint.SearchResponse) {
+        var snapshot = NSDiffableDataSourceSnapshot<Int, SearchResultDisplayModel>()
+        snapshot.appendSections([1])
+        let models = response.results!.map({ SearchResultDisplayModel(response: $0) })
+        snapshot.appendItems(models, toSection: 1)
+        viewState.searchResultsSnapshot = snapshot
     }
 }
 
@@ -86,11 +114,13 @@ extension SearchMainViewModel {
     class ViewState {
         @Published var displayMode: DisplayMode = .suggestions
         @Published var searchQuery: String?
-        @Published var suggestionsSnapshot: NSDiffableDataSourceSnapshot<Int, AutoSuggestEndpoint.AutoSuggestResponse.SuggestedQuery>?
+        @Published var suggestionsSnapshot: NSDiffableDataSourceSnapshot<Int, String>?
+        @Published var searchResultsSnapshot: NSDiffableDataSourceSnapshot<Int, SearchResultDisplayModel>?
     }
     
     class ModelState {
         let query = PassthroughSubject<String, Never>()
+        var resultsPager = SearchResultsPager()
     }
     
     enum InputAction: Equatable {
@@ -103,5 +133,19 @@ extension SearchMainViewModel {
     enum DisplayMode: Equatable {
         case suggestions
         case results
+    }
+    
+    class SearchResultsPager {
+        let limit = 20
+        var offset = 0
+        var total = 0
+        var results = [SearchResultDisplayModel]()
+        var currentQuery = ""
+        
+        init() {}
+        
+        init(query: String) {
+            currentQuery = query
+        }
     }
 }
