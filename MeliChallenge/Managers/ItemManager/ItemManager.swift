@@ -26,7 +26,7 @@ class ItemManager: ItemManagerProtocol {
         return serviceManager
             .makeRequest(AutoSuggestEndpoint
                             .getRequest(request: AutoSuggestEndpoint.AutoSuggestRequest(showFilters: true,
-                                                                                        limit: 10,
+                                                                                        limit: 20,
                                                                                         query: query)))
             .decode(type: AutoSuggestEndpoint.AutoSuggestResponse.self, decoder: JSONDecoder())
             .eraseToAnyPublisher()

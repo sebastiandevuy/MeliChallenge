@@ -17,6 +17,6 @@ class AutoSuggestEndpoint {
                                 payload: .encodable(value: request,
                                                     encoding: .url),
                                 headers: nil,
-                                ignoreCache: true)
+                                ignoreCache: false)
     }
 }

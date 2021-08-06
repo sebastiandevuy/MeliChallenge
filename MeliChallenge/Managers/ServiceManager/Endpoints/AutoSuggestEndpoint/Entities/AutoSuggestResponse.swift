@@ -17,7 +17,7 @@ extension AutoSuggestEndpoint {
             case suggestedQueries = "suggested_queries"
         }
         
-        struct SuggestedQuery: Decodable {
+        struct SuggestedQuery: Decodable, Hashable {
             let query: String
             
             enum CodingKeys: String, CodingKey {
