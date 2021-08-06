@@ -10,6 +10,9 @@ import Combine
 
 protocol ItemManagerProtocol {
     func getSuggestions(forQuery query: String) -> AnyPublisher<AutoSuggestEndpoint.AutoSuggestResponse, Error>
+    func getSearchResults(forQuery query: String,
+                          limit: Int,
+                          offset: Int) -> AnyPublisher<SearchEndpoint.SearchResponse, Error>
 }
 
 class ItemManager: ItemManagerProtocol {
@@ -28,22 +31,19 @@ class ItemManager: ItemManagerProtocol {
             .decode(type: AutoSuggestEndpoint.AutoSuggestResponse.self, decoder: JSONDecoder())
             .eraseToAnyPublisher()
     }
+    
+    func getSearchResults(forQuery query: String, limit: Int, offset: Int) -> AnyPublisher<SearchEndpoint.SearchResponse, Error> {
+        return serviceManager
+            .makeRequest(SearchEndpoint.getRequest(request: SearchEndpoint.SearchRequest(limit: limit,
+                                                                                         offset: offset,
+                                                                                         query: query)))
+            .decode(type: SearchEndpoint.SearchResponse.self, decoder: JSONDecoder())
+            .eraseToAnyPublisher()
+    }
 }
 
-
-
-//https://developers.mercadolibre.com.ar/es_ar/items-y-busquedas
-//
-//Search
-//
-//https://api.mercadolibre.com/sites/MLA/search?q=Prada&limit=10&offset=230
-//
 //Details
 //
 //https://api.mercadolibre.com/items/MLA609335270
 //
 //https://api.mercadolibre.com/items/MLU464927558
-//
-//AutoSuggest
-//
-//https://api.mercadolibre.com/sites/MLA/autosuggest?showFilters=true&limit=6&api_version=2&q=nvidia%20gfo

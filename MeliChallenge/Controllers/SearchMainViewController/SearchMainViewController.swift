@@ -16,7 +16,12 @@ class SearchMainViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .yellow
 
-        itemManager.getSuggestions(forQuery: "onix").sink { completion in
+//        itemManager.getSuggestions(forQuery: "onix").sink { completion in
+//            print("Done")
+//        } receiveValue: { response in
+//            print(response)
+//        }.store(in: &subscribers)
+        itemManager.getSearchResults(forQuery: "onix", limit: 10, offset: 0).sink { completion in
             print("Done")
         } receiveValue: { response in
             print(response)
