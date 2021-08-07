@@ -111,8 +111,13 @@ class SearchMainViewController: UIViewController {
         
         viewModel.viewState.$searchResultsSnapshot.sink { [weak self] snapshot in
             guard let self = self, let snapshot = snapshot else { return }
-            self.searchResultsDataSource?.apply(snapshot, animatingDifferences: false)
+            self.searchResultsDataSource?.apply(snapshot, animatingDifferences: true)
             self.resultsTableView.flashScrollIndicators()
+        }.store(in: &subscribers)
+        
+        viewModel.viewState.$resultFooterDisplayType.sink { [weak self] type in
+            guard let self = self else { return }
+            self.footerView.setDisplayType(type)
         }.store(in: &subscribers)
     }
 }

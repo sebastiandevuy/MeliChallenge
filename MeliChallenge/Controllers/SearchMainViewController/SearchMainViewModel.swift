@@ -37,7 +37,7 @@ class SearchMainViewModel: ViewModelable {
         case .didTapSuggestion(let atIndex):
             handleDidTapSuggestion(atIndex)
         case .didTapResult(let atIndex):
-            print()
+            handleDidTapResult(atIndex)
         case .didShowResultFooter:
             handleDidShowResultFooter()
         }
@@ -107,9 +107,12 @@ class SearchMainViewModel: ViewModelable {
             .getSearchResults(forQuery: modelState.resultsPager.currentQuery,
                               limit: modelState.resultsPager.limit,
                               offset: modelState.resultsPager.offset).sink(receiveCompletion: { [weak self] completion in
+                                defer {
                                     self?.modelState.resultsPager.isFetchingPageResults = false
+                                }
                                 switch completion {
                                 case .failure(let error):
+                                    self?.viewState.resultFooterDisplayType = .retry
                                     print(error)
                                 case .finished:
                                     return
@@ -155,9 +158,18 @@ class SearchMainViewModel: ViewModelable {
     private func handleDidShowResultFooter() {
         guard !modelState.resultsPager.isFetchingPageResults
                 && !modelState.resultsPager.hasReachedResultLimit
-                && !modelState.resultsPager.isEmptyPaging else { return }
+                && !modelState.resultsPager.isEmptyPaging else {
+            viewState.resultFooterDisplayType = .empty
+            return
+        }
         modelState.resultsPager.isFetchingPageResults = true
+        viewState.resultFooterDisplayType = .loading
         preformSearch()
+    }
+    
+    private func handleDidTapResult(_ index: Int) {
+        let selectedResult = modelState.resultsPager.results[index]
+        print(selectedResult)
     }
 }
 
@@ -167,6 +179,7 @@ extension SearchMainViewModel {
         @Published var autoSuggestQuery: String?
         @Published var suggestionsSnapshot: NSDiffableDataSourceSnapshot<Int, String>?
         @Published var searchResultsSnapshot: NSDiffableDataSourceSnapshot<Int, SearchResultDisplayModel>?
+        @Published var resultFooterDisplayType: TableFooterView.DisplayType = .empty
     }
     
     class ModelState {
