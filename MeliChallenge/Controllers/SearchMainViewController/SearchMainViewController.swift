@@ -14,6 +14,8 @@ class SearchMainViewController: UIViewController {
     
     private let suggestionsTableView = UITableView(frame: .zero, style: .grouped)
     private let resultsTableView = UITableView(frame: .zero, style: .grouped)
+    private let searchBar = UISearchBar()
+    private let footerView = TableFooterView()
     
     private var suggestionsDataSource: UITableViewDiffableDataSource<Int, String>?
     private var searchResultsDataSource: UITableViewDiffableDataSource<Int, SearchResultDisplayModel>?
@@ -35,11 +37,20 @@ class SearchMainViewController: UIViewController {
     
     private func setupView() {
         view.backgroundColor = .white
-        let search = UISearchController(searchResultsController: nil)
-        search.searchBar.delegate = self
-        search.obscuresBackgroundDuringPresentation = false
-        self.navigationItem.searchController = search
+        navigationController?.setNavigationBarHidden(true, animated: false)
         
+        searchBar.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(searchBar)
+        NSLayoutConstraint.activate([searchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+                                     searchBar.leftAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leftAnchor),
+                                     searchBar.rightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor),
+                                     searchBar.heightAnchor.constraint(equalToConstant: 60)])
+        searchBar.delegate = self
+        
+        var frame = CGRect.zero
+        frame.size.height = .leastNormalMagnitude
+        resultsTableView.backgroundColor = .white
+        resultsTableView.tableHeaderView = UIView(frame: frame)
         resultsTableView.translatesAutoresizingMaskIntoConstraints = false
         resultsTableView.tag = Table.results.rawValue
         resultsTableView.register(SearchResultTableViewCell.self, forCellReuseIdentifier: "searchResultCell")
@@ -52,11 +63,13 @@ class SearchMainViewController: UIViewController {
             return cell
         }
         view.addSubview(resultsTableView)
-        NSLayoutConstraint.activate([resultsTableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+        NSLayoutConstraint.activate([resultsTableView.topAnchor.constraint(equalTo: searchBar.bottomAnchor),
                                      resultsTableView.leftAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leftAnchor),
                                      resultsTableView.rightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor),
                                      resultsTableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)])
         
+        suggestionsTableView.backgroundColor = .white
+        suggestionsTableView.tableHeaderView = UIView(frame: frame)
         suggestionsTableView.translatesAutoresizingMaskIntoConstraints = false
         suggestionsTableView.tag = Table.suggestions.rawValue
         suggestionsTableView.delegate = self
@@ -69,7 +82,7 @@ class SearchMainViewController: UIViewController {
             return cell
         }
         view.addSubview(suggestionsTableView)
-        NSLayoutConstraint.activate([suggestionsTableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+        NSLayoutConstraint.activate([suggestionsTableView.topAnchor.constraint(equalTo: searchBar.bottomAnchor),
                                      suggestionsTableView.leftAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leftAnchor),
                                      suggestionsTableView.rightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor),
                                      suggestionsTableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)])
@@ -88,7 +101,7 @@ class SearchMainViewController: UIViewController {
         
         viewModel.viewState.$autoSuggestQuery.receive(on: DispatchQueue.main).sink { [weak self] query in
             guard let self = self else { return }
-            self.navigationItem.searchController?.searchBar.text = query
+            self.searchBar.text = query
         }.store(in: &subscribers)
         
         viewModel.viewState.$suggestionsSnapshot.sink { [weak self] snapshot in
@@ -99,6 +112,7 @@ class SearchMainViewController: UIViewController {
         viewModel.viewState.$searchResultsSnapshot.sink { [weak self] snapshot in
             guard let self = self, let snapshot = snapshot else { return }
             self.searchResultsDataSource?.apply(snapshot, animatingDifferences: false)
+            self.resultsTableView.flashScrollIndicators()
         }.store(in: &subscribers)
     }
 }
@@ -111,7 +125,7 @@ extension SearchMainViewController: UITableViewDelegate {
         case .results:
             viewModel.dispatchInputAction(.didTapResult(atIndex: indexPath.row))
         case .suggestions:
-            navigationItem.searchController?.isActive = false
+            searchBar.resignFirstResponder()
             viewModel.dispatchInputAction(.didTapSuggestion(atIndex: indexPath.row))
         }
     }
@@ -130,35 +144,39 @@ extension SearchMainViewController: UITableViewDelegate {
         guard let table = Table(rawValue: tableView.tag) else { return nil }
         switch table {
         case .results:
-            let view = UIView()
-            view.backgroundColor = .blue
-            return view
+            return footerView
         case .suggestions:
             return nil
         }
     }
     
     func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-        return 40.0
+        return 30.0
     }
 }
 
 extension SearchMainViewController: UISearchBarDelegate {
     func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
         viewModel.dispatchInputAction(.didFocusOnSearch)
+        searchBar.setShowsCancelButton(true, animated: true)
     }
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         viewModel.dispatchInputAction(.didTapCancel)
+        searchBar.resignFirstResponder()
     }
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        navigationItem.searchController?.isActive = false
+        searchBar.resignFirstResponder()
         viewModel.dispatchInputAction(.didTapSearch)
     }
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         viewModel.dispatchInputAction(.didUpdateQuery(query: searchText))
+    }
+    
+    func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
+        searchBar.setShowsCancelButton(false, animated: true)
     }
 }
 

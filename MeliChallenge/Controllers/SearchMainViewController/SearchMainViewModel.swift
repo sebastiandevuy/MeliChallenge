@@ -70,6 +70,7 @@ class SearchMainViewModel: ViewModelable {
     
     private func handleDidTapCancel() {
         viewState.displayMode = .results
+        viewState.autoSuggestQuery = ""
         viewState.suggestionsSnapshot?.deleteAllItems()
         modelState.suggestedQueries.removeAll()
     }
@@ -107,6 +108,12 @@ class SearchMainViewModel: ViewModelable {
                               limit: modelState.resultsPager.limit,
                               offset: modelState.resultsPager.offset).sink(receiveCompletion: { [weak self] completion in
                                     self?.modelState.resultsPager.isFetchingPageResults = false
+                                switch completion {
+                                case .failure(let error):
+                                    print(error)
+                                case .finished:
+                                    return
+                                }
             }, receiveValue: { [weak self] response in
                 self?.handleSearchResponse(response)
                 self?.modelState.resultsPager.isFetchingPageResults = false
@@ -123,6 +130,7 @@ class SearchMainViewModel: ViewModelable {
     private func handleSearchResponse(_ response: SearchEndpoint.SearchResponse) {
         modelState.resultsPager.offset += 20
         modelState.resultsPager.total = response.paging.total
+        modelState.resultsPager.hasRequestedResults = true
         
         let models = response.results!.map({ SearchResultDisplayModel(response: $0) })
         modelState.resultsPager.results.append(contentsOf: models)
@@ -146,7 +154,8 @@ class SearchMainViewModel: ViewModelable {
     
     private func handleDidShowResultFooter() {
         guard !modelState.resultsPager.isFetchingPageResults
-                && !modelState.resultsPager.hasReachedResultLimit else { return }
+                && !modelState.resultsPager.hasReachedResultLimit
+                && !modelState.resultsPager.isEmptyPaging else { return }
         modelState.resultsPager.isFetchingPageResults = true
         preformSearch()
     }
@@ -188,8 +197,12 @@ extension SearchMainViewModel {
         var results = [SearchResultDisplayModel]()
         var currentQuery = ""
         var isFetchingPageResults = false
+        var hasRequestedResults = false
         var hasReachedResultLimit: Bool {
             return total != 0 && results.count == total
+        }
+        var isEmptyPaging: Bool {
+            return hasRequestedResults && total == 0
         }
         
         init() {}
