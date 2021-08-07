@@ -41,7 +41,9 @@ class SearchMainViewController: UIViewController {
         self.navigationItem.searchController = search
         
         resultsTableView.translatesAutoresizingMaskIntoConstraints = false
+        resultsTableView.tag = Table.results.rawValue
         resultsTableView.register(SearchResultTableViewCell.self, forCellReuseIdentifier: "searchResultCell")
+        resultsTableView.delegate = self
         searchResultsDataSource = UITableViewDiffableDataSource<Int, SearchResultDisplayModel>(tableView: resultsTableView) { tableView, indexPath, resultModel in
             guard let cell = tableView.dequeueReusableCell(withIdentifier: "searchResultCell") as? SearchResultTableViewCell else {
                 return UITableViewCell()
@@ -56,6 +58,8 @@ class SearchMainViewController: UIViewController {
                                      resultsTableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)])
         
         suggestionsTableView.translatesAutoresizingMaskIntoConstraints = false
+        suggestionsTableView.tag = Table.suggestions.rawValue
+        suggestionsTableView.delegate = self
         suggestionsTableView.register(SuggestionTableViewCell.self, forCellReuseIdentifier: "suggestionCell")
         suggestionsDataSource = UITableViewDiffableDataSource<Int, String>(tableView: suggestionsTableView) { tableView, indexPath, suggestedQuery in
             guard let cell = tableView.dequeueReusableCell(withIdentifier: "suggestionCell") as? SuggestionTableViewCell else {
@@ -82,7 +86,7 @@ class SearchMainViewController: UIViewController {
             }
         }.store(in: &subscribers)
         
-        viewModel.viewState.$searchQuery.receive(on: DispatchQueue.main).sink { [weak self] query in
+        viewModel.viewState.$autoSuggestQuery.receive(on: DispatchQueue.main).sink { [weak self] query in
             guard let self = self else { return }
             self.navigationItem.searchController?.searchBar.text = query
         }.store(in: &subscribers)
@@ -96,6 +100,46 @@ class SearchMainViewController: UIViewController {
             guard let self = self, let snapshot = snapshot else { return }
             self.searchResultsDataSource?.apply(snapshot, animatingDifferences: false)
         }.store(in: &subscribers)
+    }
+}
+
+extension SearchMainViewController: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        guard let table = Table(rawValue: tableView.tag) else { return }
+        switch table {
+        case .results:
+            viewModel.dispatchInputAction(.didTapResult(atIndex: indexPath.row))
+        case .suggestions:
+            navigationItem.searchController?.isActive = false
+            viewModel.dispatchInputAction(.didTapSuggestion(atIndex: indexPath.row))
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, willDisplayFooterView view: UIView, forSection section: Int) {
+        guard let table = Table(rawValue: tableView.tag) else { return }
+        switch table {
+        case .results:
+            viewModel.dispatchInputAction(.didShowResultFooter)
+        case .suggestions:
+            return
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+        guard let table = Table(rawValue: tableView.tag) else { return nil }
+        switch table {
+        case .results:
+            let view = UIView()
+            view.backgroundColor = .blue
+            return view
+        case .suggestions:
+            return nil
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+        return 40.0
     }
 }
 
@@ -115,5 +159,12 @@ extension SearchMainViewController: UISearchBarDelegate {
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         viewModel.dispatchInputAction(.didUpdateQuery(query: searchText))
+    }
+}
+
+extension SearchMainViewController {
+    enum Table: Int {
+        case suggestions = 10
+        case results = 20
     }
 }

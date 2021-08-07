@@ -34,6 +34,12 @@ class SearchMainViewModel: ViewModelable {
             handleDidTapCancel()
         case .didFocusOnSearch:
             handleDidFocusOnSearch()
+        case .didTapSuggestion(let atIndex):
+            handleDidTapSuggestion(atIndex)
+        case .didTapResult(let atIndex):
+            print()
+        case .didShowResultFooter:
+            handleDidShowResultFooter()
         }
     }
     
@@ -42,7 +48,8 @@ class SearchMainViewModel: ViewModelable {
             .query
             .debounce(for: .milliseconds(500), scheduler: DispatchQueue.global(qos: .userInteractive))
             .sink(receiveValue: { [weak self] debouncedQuery in
-                self?.getSuggestions(query: debouncedQuery)
+                guard let self = self, let query = self.viewState.autoSuggestQuery, !query.isEmpty else { return }
+                self.getSuggestions(query: debouncedQuery)
             }).store(in: &subscribers)
     }
     
@@ -52,13 +59,19 @@ class SearchMainViewModel: ViewModelable {
     }
     
     private func handleDidUpdateQuery(_ query: String?) {
-        viewState.searchQuery = query
-        guard let query = query else { return }
+        viewState.autoSuggestQuery = query
+        guard let query = query, !query.isEmpty else {
+            viewState.suggestionsSnapshot?.deleteAllItems()
+            modelState.suggestedQueries.removeAll()
+            return
+        }
         modelState.query.send(query)
     }
     
     private func handleDidTapCancel() {
         viewState.displayMode = .results
+        viewState.suggestionsSnapshot?.deleteAllItems()
+        modelState.suggestedQueries.removeAll()
     }
     
     private func handleDidFocusOnSearch() {
@@ -80,46 +93,76 @@ class SearchMainViewModel: ViewModelable {
         var snapshot = NSDiffableDataSourceSnapshot<Int, String>()
         snapshot.appendSections([1])
         let queries = response.suggestedQueries!.map({return $0.query})
+        modelState.suggestedQueries = queries
         snapshot.appendItems(queries, toSection: 1)
         viewState.suggestionsSnapshot = snapshot
     }
     
     private func preformSearch() {
-        guard let query = viewState.searchQuery else { return }
+        guard let query = viewState.autoSuggestQuery else { return }
+        updatePagerIfNeeded(forQuery: query)
         searchSubscriber?.cancel()
         searchSubscriber = itemManager
-            .getSearchResults(forQuery: query, limit: 20, offset: 0).sink(receiveCompletion: { completion in
-                print(completion)
+            .getSearchResults(forQuery: modelState.resultsPager.currentQuery,
+                              limit: modelState.resultsPager.limit,
+                              offset: modelState.resultsPager.offset).sink(receiveCompletion: { [weak self] completion in
+                                    self?.modelState.resultsPager.isFetchingPageResults = false
             }, receiveValue: { [weak self] response in
                 self?.handleSearchResponse(response)
+                self?.modelState.resultsPager.isFetchingPageResults = false
             })
     }
     
-    private func updatePager(forQuery query: String) {
+    private func updatePagerIfNeeded(forQuery query: String) {
         if modelState.resultsPager.currentQuery != query {
             modelState.resultsPager = SearchResultsPager(query: query)
+            viewState.searchResultsSnapshot = nil
         }
     }
     
     private func handleSearchResponse(_ response: SearchEndpoint.SearchResponse) {
-        var snapshot = NSDiffableDataSourceSnapshot<Int, SearchResultDisplayModel>()
-        snapshot.appendSections([1])
+        modelState.resultsPager.offset += 20
+        modelState.resultsPager.total = response.paging.total
+        
         let models = response.results!.map({ SearchResultDisplayModel(response: $0) })
-        snapshot.appendItems(models, toSection: 1)
-        viewState.searchResultsSnapshot = snapshot
+        modelState.resultsPager.results.append(contentsOf: models)
+        if viewState.searchResultsSnapshot != nil {
+            viewState.searchResultsSnapshot?.appendItems(models, toSection: 1)
+        } else {
+            var snapshot = NSDiffableDataSourceSnapshot<Int, SearchResultDisplayModel>()
+            snapshot.appendSections([1])
+            snapshot.appendItems(models, toSection: 1)
+            viewState.searchResultsSnapshot = snapshot
+        }
+    }
+    
+    private func handleDidTapSuggestion(_ index: Int) {
+        viewState.displayMode = .results
+        let query = modelState.suggestedQueries[index]
+        getSuggestions(query: query)
+        viewState.autoSuggestQuery = query
+        preformSearch()
+    }
+    
+    private func handleDidShowResultFooter() {
+        guard !modelState.resultsPager.isFetchingPageResults
+                && !modelState.resultsPager.hasReachedResultLimit else { return }
+        modelState.resultsPager.isFetchingPageResults = true
+        preformSearch()
     }
 }
 
 extension SearchMainViewModel {
     class ViewState {
         @Published var displayMode: DisplayMode = .suggestions
-        @Published var searchQuery: String?
+        @Published var autoSuggestQuery: String?
         @Published var suggestionsSnapshot: NSDiffableDataSourceSnapshot<Int, String>?
         @Published var searchResultsSnapshot: NSDiffableDataSourceSnapshot<Int, SearchResultDisplayModel>?
     }
     
     class ModelState {
         let query = PassthroughSubject<String, Never>()
+        var suggestedQueries = [String]()
         var resultsPager = SearchResultsPager()
     }
     
@@ -128,6 +171,9 @@ extension SearchMainViewModel {
         case didUpdateQuery(query: String?)
         case didTapCancel
         case didFocusOnSearch
+        case didTapSuggestion(atIndex: Int)
+        case didTapResult(atIndex: Int)
+        case didShowResultFooter
     }
     
     enum DisplayMode: Equatable {
@@ -141,6 +187,10 @@ extension SearchMainViewModel {
         var total = 0
         var results = [SearchResultDisplayModel]()
         var currentQuery = ""
+        var isFetchingPageResults = false
+        var hasReachedResultLimit: Bool {
+            return total != 0 && results.count == total
+        }
         
         init() {}
         

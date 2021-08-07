@@ -39,6 +39,5 @@ class SuggestionTableViewCell: UITableViewCell {
     
     func setupWithQuery(_ query: String) {
         queryLabel.text = query
-        
     }
 }

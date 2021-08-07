@@ -31,6 +31,7 @@ class SearchResultTableViewCell: UITableViewCell {
                                      searchImageView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8)])
         
         queryLabel.translatesAutoresizingMaskIntoConstraints = false
+        queryLabel.numberOfLines = 0
         addSubview(queryLabel)
         NSLayoutConstraint.activate([queryLabel.centerYAnchor.constraint(equalTo: searchImageView.centerYAnchor),
                                      queryLabel.leftAnchor.constraint(equalTo: searchImageView.rightAnchor, constant: 8),
