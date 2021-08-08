@@ -14,13 +14,17 @@ class SearchMainViewModel: ViewModelable {
     var modelState: ModelState = ModelState()
     
     private let itemManager: ItemManager
+    private let navigator: NavigatorProtocol
     private var subscribers = Set<AnyCancellable>()
     private var getSuggestionsSubscriber: AnyCancellable?
     private var searchSubscriber: AnyCancellable?
+    private var itemSubscriber: AnyCancellable?
     
     
-    init(itemManager: ItemManager = ItemManager()) {
+    init(itemManager: ItemManager = ItemManager(),
+         navigator: NavigatorProtocol = Navigator.shared) {
         self.itemManager = itemManager
+        self.navigator = navigator
         setupModelStateBindings()
     }
     
@@ -169,7 +173,12 @@ class SearchMainViewModel: ViewModelable {
     
     private func handleDidTapResult(_ index: Int) {
         let selectedResult = modelState.resultsPager.results[index]
-        print(selectedResult)
+        itemSubscriber = itemManager.getItem(itemId: selectedResult.id).receive(on: DispatchQueue.main).sink(receiveCompletion: { completion in
+            print(completion)
+        }, receiveValue: { [weak self] jsonResponse in
+            guard let self = self else { return }
+            self.navigator.pushController(controller: ItemDetailsViewController(viewModel: ItemDetailsViewModel(build: ItemDetailsViewModel.Build(json: jsonResponse))))
+        })
     }
 }
 

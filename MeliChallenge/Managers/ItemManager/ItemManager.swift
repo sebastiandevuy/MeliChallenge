@@ -13,6 +13,7 @@ protocol ItemManagerProtocol {
     func getSearchResults(forQuery query: String,
                           limit: Int,
                           offset: Int) -> AnyPublisher<SearchEndpoint.SearchResponse, Error>
+    func getItem(itemId: String) -> AnyPublisher<String, Error>
 }
 
 class ItemManager: ItemManagerProtocol {
@@ -40,10 +41,11 @@ class ItemManager: ItemManagerProtocol {
             .decode(type: SearchEndpoint.SearchResponse.self, decoder: JSONDecoder())
             .eraseToAnyPublisher()
     }
+    
+    func getItem(itemId: String) -> AnyPublisher<String, Error> {
+        return serviceManager
+            .makeRequest(ItemsEndpoint.getRequest(request: ItemsEndpoint.ItemRequest(id: itemId)))
+            .tryMap({String(data: $0, encoding: .utf8) ?? ""})
+            .eraseToAnyPublisher()
+    }
 }
-
-//Details
-//
-//https://api.mercadolibre.com/items/MLA609335270
-//
-//https://api.mercadolibre.com/items/MLU464927558

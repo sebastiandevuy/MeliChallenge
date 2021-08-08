@@ -24,8 +24,10 @@ class SearchResultTableViewCell: UITableViewCell {
     private func setupView() {
         searchImageView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(searchImageView)
+        let imageHeightConstraint = searchImageView.heightAnchor.constraint(equalToConstant: 100)
+        imageHeightConstraint.priority = .defaultHigh
         NSLayoutConstraint.activate([searchImageView.widthAnchor.constraint(equalToConstant: 100),
-                                     searchImageView.heightAnchor.constraint(equalToConstant: 100),
+                                     imageHeightConstraint,
                                      searchImageView.topAnchor.constraint(equalTo: topAnchor, constant: 8),
                                      searchImageView.leftAnchor.constraint(equalTo: leftAnchor, constant: 8),
                                      searchImageView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8)])

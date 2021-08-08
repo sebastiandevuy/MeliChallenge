@@ -35,9 +35,13 @@ class SearchMainViewController: UIViewController {
         setupViewModelBindings()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(true, animated: false)
+    }
+    
     private func setupView() {
         view.backgroundColor = .white
-        navigationController?.setNavigationBarHidden(true, animated: false)
         
         searchBar.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(searchBar)

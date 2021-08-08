@@ -24,8 +24,10 @@ class SuggestionTableViewCell: UITableViewCell {
         searchImageView.translatesAutoresizingMaskIntoConstraints = false
         searchImageView.image = UIImage(named: "searchIcon")
         addSubview(searchImageView)
+        let imageHeightConstraint = searchImageView.heightAnchor.constraint(equalToConstant: 25)
+        imageHeightConstraint.priority = .defaultHigh
         NSLayoutConstraint.activate([searchImageView.widthAnchor.constraint(equalToConstant: 25),
-                                     searchImageView.heightAnchor.constraint(equalToConstant: 25),
+                                     imageHeightConstraint,
                                      searchImageView.topAnchor.constraint(equalTo: topAnchor, constant: 8),
                                      searchImageView.leftAnchor.constraint(equalTo: leftAnchor, constant: 8),
                                      searchImageView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8)])
