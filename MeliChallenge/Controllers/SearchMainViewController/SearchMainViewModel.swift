@@ -13,7 +13,7 @@ class SearchMainViewModel: ViewModelable {
     var viewState: ViewState = ViewState()
     var modelState: ModelState = ModelState()
     
-    private let itemManager: ItemManager
+    private let itemManager: ItemManagerProtocol
     private let navigator: NavigatorProtocol
     private var subscribers = Set<AnyCancellable>()
     private var getSuggestionsSubscriber: AnyCancellable?
@@ -21,7 +21,7 @@ class SearchMainViewModel: ViewModelable {
     private var itemSubscriber: AnyCancellable?
     
     
-    init(itemManager: ItemManager = ItemManager(),
+    init(itemManager: ItemManagerProtocol = ItemManager(),
          navigator: NavigatorProtocol = Navigator.shared) {
         self.itemManager = itemManager
         self.navigator = navigator
@@ -88,6 +88,7 @@ class SearchMainViewModel: ViewModelable {
         getSuggestionsSubscriber = itemManager
             .getSuggestions(forQuery: query)
             .sink(receiveCompletion: { completion in
+                // Handle error
                 print(completion)
             }, receiveValue: { [weak self] response in
                 self?.setupSuggestionsSnapshotFromResponse(response)
